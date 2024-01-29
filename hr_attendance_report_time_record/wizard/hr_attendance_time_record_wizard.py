@@ -79,19 +79,12 @@ class HrAttendanceTimeRecord(models.TransientModel):
 
     def _get_work_interval_for_employee(self, employee_id, check_in, check_out):
         employee_tz = pytz.timezone(employee_id.tz or "UTC")
-        work_interval = employee_id.resource_calendar_id._work_intervals_batch(
-            check_in.replace(tzinfo=employee_tz),
-            check_out.replace(tzinfo=employee_tz),
-            resources=employee_id.resource_id,
-            tz=employee_tz,
-        )[employee_id.resource_id.id]
-        if work_interval and work_interval._items:
-            check_in = min(map(lambda a: a[0], work_interval._items)).replace(
-                tzinfo=None
-            )
-            check_out = max(map(lambda a: a[1], work_interval._items)).replace(
-                tzinfo=None
-            )
+        work_interval = employee_id.resource_id._get_work_interval(
+            check_in.replace(tzinfo=employee_tz), check_out.replace(tzinfo=employee_tz)
+        )[employee_id.resource_id]
+        if work_interval:
+            check_in = work_interval[0]
+            check_out = work_interval[1]
         return check_in, check_out
 
     def _get_theorical_check_in_or_out_for_employee(
@@ -104,7 +97,7 @@ class HrAttendanceTimeRecord(models.TransientModel):
         check_theorical = check_in_theorical if is_check_in else check_out_theorical
         check = check_in if is_check_in else check_out
         check_theorical = check_theorical.replace(tzinfo=check.tzinfo)
-        if (check + timedelta(minutes=tolerance_time)) < check_theorical:
+        if (check_theorical - timedelta(minutes=tolerance_time)) > check:
             check_theorical = check
         return check_theorical
 
