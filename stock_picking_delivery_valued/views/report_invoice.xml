@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <template
+        id="report_invoice_document"
+        inherit_id="account.report_invoice_document"
+        priority="999"
+    >
+        <!-- Hide lines linked to delivery sale order lines -->
+        <xpath expr="//tbody/t[@t-set='lines']" position="after">
+            <t
+                t-set="delivery_lines"
+                t-value="lines.filtered(lambda aml: aml.sale_line_ids.filtered('is_delivery'))"
+            />
+        </xpath>
+        <xpath
+            expr="//t[@name='account_invoice_line_accountable']/.."
+            position="attributes"
+        >
+            <attribute
+                name="t-att-class"
+            >'d-none' if delivery_lines and line in delivery_lines else 'bg-200 font-weight-bold o_line_section' if line.display_type == 'line_section' else 'font-italic o_line_note' if line.display_type == 'line_note' else ''</attribute>
+        </xpath>
+        <xpath expr="//t[@t-set='payment_term_details']" position="before">
+            <p t-if="delivery_lines" name="delivery_amount">
+                <t
+                    t-set="delivery_amount_subtotal"
+                    t-value="sum(delivery_lines.mapped('price_subtotal'))"
+                />
+                <t t-if="delivery_amount_subtotal">
+                    <t
+                        t-set="product_punto_verde"
+                        t-value="o.env['product.template'].search([
+                        ('type', '=', 'service'),
+                        ('default_code', '=', 'punto_verde'),
+                    ])"
+                    />
+                    <span
+                    >Gestión de embalajes, punto verde y logística según Art 78 Ley 37/92:&#160;<t
+                            t-esc="product_punto_verde.list_price"
+                        /> €/entrega</span>
+                </t>
+            </p>
+        </xpath>
+    </template>
+</odoo>

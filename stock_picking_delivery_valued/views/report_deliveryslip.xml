@@ -1,0 +1,38 @@
+<odoo>
+
+    <!-- remove carrier info from header info -->
+    <template
+        id="report_delivery_document2"
+        inherit_id="delivery.report_delivery_document2"
+    >
+        <xpath expr="//p[@t-field='o.carrier_id']/.." position="attributes">
+            <attribute name="class">col-auto d-none</attribute>
+        </xpath>
+    </template>
+
+    <template
+        id="valued_report_picking"
+        inherit_id="stock_picking_report_valued.valued_report_picking"
+    >
+        <xpath expr="//span[@t-field='o.amount_untaxed']/../../../.." position="after">
+            <t
+                t-set="delivery_lines"
+                t-value="o.sale_id.order_line.filtered('is_delivery')"
+            />
+            <t t-if="delivery_lines">
+                <t
+                    t-set="product_punto_verde"
+                    t-value="o.env['product.template'].search([
+                    ('type', '=', 'service'),
+                    ('default_code', '=', 'punto_verde'),
+                ])"
+                />
+                <span
+                >Gestión de embalajes, punto verde y logística según Art 78 Ley 37/92:&#160;<t
+                        t-esc="product_punto_verde.list_price"
+                    /> €</span>
+            </t>
+        </xpath>
+    </template>
+
+</odoo>
