@@ -6,7 +6,7 @@
     "version": "16.0.1.0.0",
     "development_status": "Beta",
     "category": "Inventory",
-    "website": "https://gitlab.tecnativa.com/Tecnativa/marmenorda-odoo",
+    "website": "https://github.com/Tecnativa/extra-addons",
     "author": "Tecnativa",
     "license": "AGPL-3",
     "application": False,
